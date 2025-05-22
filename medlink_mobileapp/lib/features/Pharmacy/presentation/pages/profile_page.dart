@@ -30,8 +30,7 @@ class _PersonalProfileState extends State<PersonalProfile> {
   final TextEditingController stateController = TextEditingController();
   final TextEditingController zipcodeController = TextEditingController();
   final TextEditingController emergencyNameController = TextEditingController();
-  final TextEditingController emergencyContactController =
-      TextEditingController();
+  final TextEditingController emergencyContactController = TextEditingController();
 
   String? selectedGender;
   List<String> selectedHealthDetails = [];
@@ -49,7 +48,7 @@ class _PersonalProfileState extends State<PersonalProfile> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       email = args?['email'] as String? ?? 'No email provided';
       token = args?['token'] as String? ?? '';
       emailController.text = email;
@@ -133,6 +132,7 @@ class _PersonalProfileState extends State<PersonalProfile> {
   }
 
   void _showHealthDetailsDialog() {
+    selectedHealthDetails = [];
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -215,6 +215,8 @@ class _PersonalProfileState extends State<PersonalProfile> {
       );
       return;
     }
+ 
+
     if (phoneController.text.length != 10 ||
         !phoneController.text.startsWith('09')) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -343,10 +345,21 @@ class _PersonalProfileState extends State<PersonalProfile> {
     for (var i = 0; i < selectedHealthDetails.length; i++) {
       selectedHealthDetails[i] = selectedHealthDetails[i].toLowerCase();
     }
+    if (selectedGender == "Male" && selectedHealthDetails.contains("pregnancy")) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Pregnancy is not a valid health detail for male users.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
 
     final profile = ProfileModel(
-      fullName:
-          fullNameController.text.isNotEmpty ? fullNameController.text : null,
+      fullName:fullNameController.text.isNotEmpty ? fullNameController.text : null,
+      userType: "customer",
+      hasCompleteProfile: true,
       email: emailController.text,
       phoneNumber: "251" + phoneController.text.substring(1),
       gender: selectedGender == "Male" ? 'M' : 'F',
@@ -366,12 +379,14 @@ class _PersonalProfileState extends State<PersonalProfile> {
       healthDetails: selectedHealthDetails,
       profilePicture: _profilePictureBase64, // Raw Base64
     );
-
+  print('Profile: $profile');
+  print('Profile JSON: ${jsonEncode(profile.toJson())}');
     context.read<ProfileBloc>().add(UpdateProfileEvent(token, profile));
   }
 
   void _populateForm(Profile profile) {
     setState(() {
+      selectedHealthDetails = profile.healthDetails;
       fullNameController.text = profile.fullName ?? '';
       phoneController.text =
           profile.phoneNumber != null && (profile.phoneNumber!.length > 3)
@@ -393,7 +408,8 @@ class _PersonalProfileState extends State<PersonalProfile> {
           : "";
       emergencyNameController.text = profile.emergencyContact?.name ?? '';
       _profilePictureBase64 = profile.profilePicture;
-
+      print('populateForm called');
+      print(_profilePictureBase64);
       if (_profilePictureBase64 != null && _profilePictureBase64!.isNotEmpty) {
         try {
           final bytes = base64Decode(_profilePictureBase64!);

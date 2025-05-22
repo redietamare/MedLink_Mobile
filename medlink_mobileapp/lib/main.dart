@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:medlink_mobileapp/features/Onboarding/presentation/Onbording.dart';
 import 'package:medlink_mobileapp/features/Onboarding/presentation/getStarted.dart';
 import 'package:medlink_mobileapp/features/Onboarding/presentation/splash_screen.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/bloc/ai_bloc.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/bloc/medicine_bloc.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/bloc/pharmacy_bloc.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/ai_page.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/cart_page.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/pharmacy_page.dart';
 import 'package:medlink_mobileapp/features/auth/presentation/bloc/user_bloc.dart';
 import 'package:medlink_mobileapp/features/auth/presentation/pages/login.dart';
 import 'package:medlink_mobileapp/features/auth/presentation/pages/register.dart';
@@ -35,9 +42,19 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => getIt<ProfileBloc>(),
         ),
+        BlocProvider(
+          create: (context) => getIt<MedicineBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<AiBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<PharmacyBloc>()
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
         initialRoute: '/splashScreen',
         onGenerateRoute: (settings) {
           Widget page;
@@ -75,14 +92,14 @@ class MyApp extends StatelessWidget {
             case '/home':
               page = const HomePage();
               break;
-            case '/prescription':
-              page = const PrescriptionPage();
+            case '/ai-chat-bot':
+              page = const AiChatbot();
               break;
             case '/cart':
               page = const CartPage();
               break;
-            case '/favorites':
-              page = const FavoritesPage();
+            case '/pharmacy':
+              page = const PharmacyPage();
               break;
             case '/personal-profile':
               final args = settings.arguments as Map<String, dynamic>;

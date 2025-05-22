@@ -122,6 +122,7 @@ Future<UserEntity> login(String email, String userType, String password, bool re
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['ok'] == true) {
+          print('Login response: ${response.body}');
           return UserModel.fromJson({
             'email': email,
             'user_type': userType,

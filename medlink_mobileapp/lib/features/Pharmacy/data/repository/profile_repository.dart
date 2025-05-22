@@ -18,6 +18,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<Failure, Profile>> getProfile(String token) async {
     try {
+      print("repository");
       final profileModel = await remoteDataSource.getProfile(token);
       return Right(profileModel);
     } on UnauthorizedException {

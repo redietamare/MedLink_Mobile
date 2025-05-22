@@ -15,10 +15,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateProfileEvent>(_onUpdateProfile);
   }
 
-  Future<void> _onLoadProfile(
-      LoadProfile event, Emitter<ProfileState> emit) async {
+  Future<void> _onLoadProfile(LoadProfile event, Emitter<ProfileState> emit) async {
     emit(ProfileLoading());
     final result = await getProfile(event.token);
+    print("bloc");
+    print(result);
     result.fold(
       (failure) {
         if (failure is ValidationFailure) {
@@ -34,6 +35,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onUpdateProfile(
       UpdateProfileEvent event, Emitter<ProfileState> emit) async {
     emit(ProfileLoading());
+    print("updatebloc");
+    print(event.profile);
     final result = await updateProfile(event.token, event.profile);
     result.fold(
       (failure) {

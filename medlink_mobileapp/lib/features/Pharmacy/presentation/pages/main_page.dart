@@ -1,36 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/ai_page.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/cart_page.dart';
 import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/home_page.dart';
+import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/pharmacy_page.dart';
 import 'package:medlink_mobileapp/features/Pharmacy/presentation/pages/profile_page.dart';
 import 'package:medlink_mobileapp/features/auth/presentation/bloc/auth_state.dart';
 import 'package:medlink_mobileapp/features/auth/presentation/bloc/user_bloc.dart';
+import 'package:awesome_bottom_bar/awesome_bottom_bar.dart';
+import 'package:awesome_bottom_bar/widgets/inspired/inspired.dart';
 
-class PrescriptionPage extends StatelessWidget {
-  const PrescriptionPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Prescription Page'));
-  }
-}
 
-class CartPage extends StatelessWidget {
-  const CartPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Cart Page'));
-  }
-}
-
-class FavoritesPage extends StatelessWidget {
-  const FavoritesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Favorites Page'));
-  }
-}
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -43,6 +25,26 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   String email = '';
+  @override
+  void initState() {
+    super.initState();
+    // Fetch token and navigate to home with arguments
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = await context.read<UserBloc>().getAccessToken();
+      if (token != null && mounted) {
+        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          '/home',
+          (route) => false,
+          arguments: {'email': email, 'token': token},
+        );
+      } else {
+        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false,
+        );
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -55,22 +57,69 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onItemTapped(int index) async {
+    if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
     });
 
     switch (index) {
       case 0:
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil('/home', (route) => false);
+        final token = await context.read<UserBloc>().getAccessToken();
+        if (token != null) {
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/home',
+            (route) => false,
+            arguments: {'email': email, 'token': token},
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Authentication token not found. Please log in again.')),
+          );
+          _navigatorKey.currentState
+              ?.pushNamedAndRemoveUntil('/login', (route) => false);
+        }
         break;
       case 1:
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil('/prescription', (route) => false);
+        final token = await context.read<UserBloc>().getAccessToken();
+        if (token != null) {
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/ai-chat-bot',
+            (route) => false,
+            arguments: {'email': email, 'token': token},
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Authentication token not found. Please log in again.')),
+          );
+          _navigatorKey.currentState
+              ?.pushNamedAndRemoveUntil('/login', (route) => false);
+        }
         break;
       case 2:
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil('/cart', (route) => false);
+        final token = await context.read<UserBloc>().getAccessToken();
+        if (token != null) {
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/pharmacy',
+            (route) => false,
+            arguments: {'email': email, 'token': token},
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Authentication token not found. Please log in again.')),
+          );
+          _navigatorKey.currentState
+              ?.pushNamedAndRemoveUntil('/login', (route) => false);
+        }
         break;
       case 3:
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil('/favorites', (route) => false);
+        _navigatorKey.currentState
+            ?.pushNamedAndRemoveUntil('/cart', (route) => false);
         break;
       case 4:
         // Retrieve the token before navigating
@@ -80,14 +129,15 @@ class _MainPageState extends State<MainPage> {
             '/personal-profile',
             (route) => false,
             arguments: {'email': email, 'token': token},
-  
-
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Authentication token not found. Please log in again.')),
+            const SnackBar(
+                content: Text(
+                    'Authentication token not found. Please log in again.')),
           );
-          _navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+          _navigatorKey.currentState
+              ?.pushNamedAndRemoveUntil('/login', (route) => false);
         }
         break;
     }
@@ -98,21 +148,23 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: Navigator(
         key: _navigatorKey,
-        initialRoute: '/home',
         onGenerateRoute: (settings) {
           Widget page;
           switch (settings.name) {
             case '/home':
+              final args = settings.arguments as Map<String, dynamic>;
               page = HomePage();
               break;
-            case '/prescription':
-              page = const Center(child: Text('Prescription Page'));
+            case '/ai-chat-bot':
+              final args = settings.arguments as Map<String, dynamic>;
+              page = AiChatbot();
+              break;
+            case '/pharmacy':
+              final args = settings.arguments as Map<String, dynamic>;
+              page = PharmacyPage();
               break;
             case '/cart':
-              page = const Center(child: Text('Cart Page'));
-              break;
-            case '/favorites':
-              page = const Center(child: Text('Favorites Page'));
+              page = CartPage();
               break;
             case '/personal-profile':
               final args = settings.arguments as Map<String, dynamic>;
@@ -126,17 +178,34 @@ class _MainPageState extends State<MainPage> {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Prescription'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorites'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: const Color(0xFF2b8761),
         unselectedItemColor: Colors.grey,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/home.png', width: 28, height: 28),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/ai.png', width: 26, height: 26),
+            label: 'AI Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/pharmacy.png',
+                width: 26, height: 26),
+            label: 'Pharmacy',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/images/cart.png', width: 26, height: 26),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person, color: Color(0xFF2b8761)),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }

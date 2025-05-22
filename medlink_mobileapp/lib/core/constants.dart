@@ -9,4 +9,8 @@ static const String forgotPasswordUrl = '$baseUrl/api/auth/forgot-password';
 static const String resetPasswordUrl = '$baseUrl/api/auth/reset-password';
 static const String customerProfileUrl = '$baseUrl/api/user/customer/profile';
 static const String getProfileImageUrl = '$baseUrl/api/user/image/';
+static const String searchUrl = '$baseUrl/api/user/pharmacy/medicine/search';
+static const String askAi = '$baseUrl/api/user/pharmacy/medicine/ask-ai';
+static const String pharmacyUrl = '$baseUrl/api/user/pharmacy';
+static const String findpharmaciesUrl = '$baseUrl/api/user/pharmacy/find';
 }
